@@ -2,6 +2,7 @@ package telran.java48.accounting.service;
 
 import org.mindrot.jbcrypt.BCrypt;
 import org.modelmapper.ModelMapper;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ import telran.java48.post.dto.exceptions.UserNotFoundExeption;
 
 @Service
 @RequiredArgsConstructor
-public class UserAccountServiceImpl implements UserAccountService {
+public class UserAccountServiceImpl implements UserAccountService,CommandLineRunner {
 
 	final UserAccountRepository userAccountRepository;
 	final ModelMapper modelMapper;
@@ -67,9 +68,9 @@ public class UserAccountServiceImpl implements UserAccountService {
 		boolean res;
 		// tak kak set - on udalaet ili true ili false
 		if (isAddRole) {
-			res = userAccount.addRole(role);
+			res = userAccount.addRole(role.toUpperCase());
 		} else {
-			res = userAccount.removeRole(role);
+			res = userAccount.removeRole(role.toUpperCase());
 		}
 		if (res) {
 			userAccountRepository.save(userAccount);
@@ -84,6 +85,20 @@ public class UserAccountServiceImpl implements UserAccountService {
 		userAccount.setPassword(passwordString);
 		userAccountRepository.save(userAccount);
 
+	}
+
+	//teper pri starte appl - poyavitsa admin
+	@Override
+	public void run(String... args) throws Exception {
+		String password = BCrypt.hashpw("admin", BCrypt.gensalt());
+		if(!userAccountRepository.existsById("admin")) {
+			UserAccount userAccount = new UserAccount("admin", password, "", "");
+			userAccount.addRole("USER");
+			userAccount.addRole("ADMINISTRATOR");
+			userAccount.addRole("MODERATOR");
+			userAccountRepository.save(userAccount);
+		}
+		
 	}
 
 }

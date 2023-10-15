@@ -10,6 +10,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sound.midi.Patch;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
@@ -46,9 +47,12 @@ public class UpdateByOwnerFilter implements Filter {
 	}
 
 	private boolean checkEndPoint(String method, String servletPath) {
-		// TODO Auto-generated method stub
-		return HttpMethod.PUT.matches(method) && servletPath.matches("/account/user/\\w+/?");
-//				&& servletPath.matches("/forum/post/\\d/?");
+		
+		return 
+		    (HttpMethod.PUT.matches(method) && servletPath.matches("/account/user/\\w+/?"))
+		||	(HttpMethod.POST.matches(method) && servletPath.matches("/forum/post/\\w+/?"))
+		||	(HttpMethod.PUT.matches(method) && servletPath.matches("/forum/post/\\w+/comment/\\w+/?"));
+		
 	}
 
 }

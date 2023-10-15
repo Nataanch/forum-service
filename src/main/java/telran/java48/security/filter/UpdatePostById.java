@@ -43,7 +43,9 @@ public class UpdatePostById implements Filter {
 			String id = arr[arr.length - 1];
 			//po id naidem ves post
 			Optional<Post> post = postRepository.findById(id);
-			
+			if (post ==null) {
+				response.sendError(404);
+			}
 			if(!principal.getName().equalsIgnoreCase(post.get().getAuthor())) {
 				response.sendError(403, "Permission post denied");
 				
@@ -61,4 +63,3 @@ public class UpdatePostById implements Filter {
 	}
 
 }
-//[0-9A-Fa-f]

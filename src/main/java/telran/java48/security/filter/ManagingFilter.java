@@ -1,7 +1,6 @@
 package telran.java48.security.filter;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.security.Principal;
 
 import javax.servlet.Filter;
@@ -18,12 +17,14 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import telran.java48.accounting.dao.UserAccountRepository;
 import telran.java48.accounting.model.UserAccount;
+import telran.java48.security.model.Role;
+import telran.java48.security.model.User;
 
 @Component
 @Order(20)
-@RequiredArgsConstructor
-public class AdminManagingFilter implements Filter {
-	final UserAccountRepository userAccountRepository;
+
+public class ManagingFilter implements Filter {
+
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
@@ -32,10 +33,10 @@ public class AdminManagingFilter implements Filter {
 		HttpServletResponse response = (HttpServletResponse) resp;
 		
 		if (checkEndPoint(request.getMethod(), request.getServletPath())) {
-			Principal principal = request.getUserPrincipal();
-			UserAccount userAccount = userAccountRepository.findById(principal.getName()).get();
+			User user = (User) request.getUserPrincipal();
+			
 			System.out.println("Good in 20");
-			if (!userAccount.getRoles().contains("ADMINISTRATOR")) {
+			if (!user.getRoles().contains(Role.ADMINISTRATOR)) {
 				response.sendError(403, "Permission denied");
 		
 				return;
@@ -48,4 +49,5 @@ public class AdminManagingFilter implements Filter {
 	private boolean checkEndPoint(String method, String path) {
 		return path.matches("/account/user/\\w+/role/\\w+/?");
 	}
+
 }

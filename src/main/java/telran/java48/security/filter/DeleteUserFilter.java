@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import telran.java48.accounting.dao.UserAccountRepository;
 import telran.java48.accounting.model.UserAccount;
+import telran.java48.security.model.Role;
+import telran.java48.security.model.User;
 
 @Component
 @Order(40)
@@ -35,12 +37,14 @@ public class DeleteUserFilter implements Filter {
 
 //prover metod i put
 		if (checkEndPoint(request.getMethod(), request.getServletPath())) {
-			Principal principal = request.getUserPrincipal();
+			User user = (User) request.getUserPrincipal();
 			// poluhim ves put v massiv
 			String[] arr = request.getServletPath().split("/");
-			String user = arr[arr.length - 1];
-			UserAccount userAccount = userAccountRepository.findById(principal.getName()).get();
-			if (!principal.getName().equalsIgnoreCase(user) && !userAccount.getRoles().contains("ADMINISTRATOR")) {
+			String userName = arr[arr.length - 1];
+			
+			
+			if (!(user.getName().equalsIgnoreCase(userName) 
+					|| user.getRoles().contains(Role.ADMINISTRATOR))) {
 				response.sendError(403);
 			
 				return;
@@ -51,7 +55,7 @@ public class DeleteUserFilter implements Filter {
 
 	private boolean checkEndPoint(String method, String servletPath) {
 		// TODO Auto-generated method stub
-		return HttpMethod.DELETE.matches(method) && servletPath.matches("/user/\\w+/?");
+		return HttpMethod.DELETE.matches(method) && servletPath.matches("/account/user/\\w+/?");
 	}
 
 }

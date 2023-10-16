@@ -1,8 +1,9 @@
 package telran.java48.accounting.service;
 
-import org.mindrot.jbcrypt.BCrypt;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class UserAccountServiceImpl implements UserAccountService,CommandLineRun
 
 	final UserAccountRepository userAccountRepository;
 	final ModelMapper modelMapper;
+	final PasswordEncoder passwordEncoder;
 
 	@Override
 	public UserDto register(UserRegisterDto userRegisterDto) {
@@ -29,7 +31,7 @@ public class UserAccountServiceImpl implements UserAccountService,CommandLineRun
 		}
 		UserAccount userAccount = modelMapper.map(userRegisterDto, UserAccount.class);
 		userAccount.addRole("USER");
-		String passwordString = BCrypt.hashpw(userRegisterDto.getPassword(), BCrypt.gensalt());	
+		String passwordString = passwordEncoder.encode(userRegisterDto.getPassword());	
 		userAccount.setPassword(passwordString);
 				userAccountRepository.save(userAccount);
 		return modelMapper.map(userAccount, UserDto.class);
@@ -81,7 +83,7 @@ public class UserAccountServiceImpl implements UserAccountService,CommandLineRun
 	@Override
 	public void changePassword(String login, String newPassword) {
 		UserAccount userAccount = userAccountRepository.findById(login).orElseThrow(UserNotFoundExeption::new);
-		String passwordString = BCrypt.hashpw(newPassword, BCrypt.gensalt());	
+		String passwordString = passwordEncoder.encode(newPassword);	
 		userAccount.setPassword(passwordString);
 		userAccountRepository.save(userAccount);
 
@@ -90,7 +92,7 @@ public class UserAccountServiceImpl implements UserAccountService,CommandLineRun
 	//teper pri starte appl - poyavitsa admin
 	@Override
 	public void run(String... args) throws Exception {
-		String password = BCrypt.hashpw("admin", BCrypt.gensalt());
+		String password = passwordEncoder.encode("admin");
 		if(!userAccountRepository.existsById("admin")) {
 			UserAccount userAccount = new UserAccount("admin", password, "", "");
 			userAccount.addRole("USER");
